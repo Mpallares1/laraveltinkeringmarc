@@ -44,9 +44,10 @@ class PeliculaController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Pelicula $pelicula)
+    public function show($id)
     {
-        //
+        $film = Pelicula::find($id);
+        return view('peliculas.show', compact('film'));
     }
 
     /**
@@ -61,34 +62,50 @@ class PeliculaController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Pelicula $id)
+    public function update(Request $request, $id)
     {
-        $film = Pelicula::find($id);
-        $validatedData = $request->validate([
-            'Title' => 'required',
-            'Description' => 'required',
-            'Duration' => 'required',
-            'Genre' => 'required',
-            'Sales' => 'required',
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'Description' => 'required|string',
+            'Duration' => 'required|string',
+            'genre' => 'required|string|max:255',
+            'sales' => 'required|integer',
         ]);
 
-        $film->update($validatedData);
+        $film = Pelicula::find($id);
+        if ($film) {
+            $film->Title = $request->input('title');
+            $film->Description = $request->input('Description');
+            $film->Duration = $request->input('Duration');
+            $film->Genre = $request->input('genre');
+            $film->Sales = $request->input('sales');
+            $film->save();
 
-        return redirect()->route('peliculas.index')
-            ->with('success', 'Pelicula actualitzada correctament.');
+            return redirect()->route('peliculas.index')
+                ->with('success', 'Película actualizada correctamente.');
+        } else {
+            return redirect()->route('peliculas.index')
+                ->with('error', 'Película no encontrada.');
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Pelicula $pelicula)
+
+
+
+
+    public function destroy($id)
     {
-        $pelicula->delete();
-
-        return redirect()->route('peliculas.index')
-            ->with('success', 'Pelicula eliminada correctament.');
-
-
-
+        $film = Pelicula::find($id);
+        if ($film) {
+            $film->delete();
+            return redirect()->route('peliculas.index')
+                ->with('success', 'Película eliminada correctamente.');
+        } else {
+            return redirect()->route('peliculas.index')
+                ->with('error', 'Película no encontrada.');
+        }
     }
 }

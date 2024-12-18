@@ -48,9 +48,10 @@ class EquiposController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Equipos $equipos)
+    public function show($id)
     {
-        //
+        $equipo = Equipos::find($id);
+        return view('equipos.show', compact('equipo'));
     }
 
     /**
@@ -67,29 +68,46 @@ class EquiposController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Equipos $equipos)
+    public function update(Request $request, $id)
     {
-        $validatedData = $request->validate([
-            'name' => 'required',
-            'city' => 'required',
-            'year_of_creation' => 'required',
-            'division' => 'required',
-            'description' => 'required',
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'year_of_creation' => 'required|integer',
+            'division' => 'required|string|max:255',
+            'description' => 'required|string',
         ]);
 
-        $equipos->update($validatedData);
+        $equipo = Equipos::find($id); // Correct class name
+        if ($equipo) {
+            $equipo->name = $request->input('name');
+            $equipo->city = $request->input('city');
+            $equipo->year_of_creation = $request->input('year_of_creation');
+            $equipo->division = $request->input('division');
+            $equipo->description = $request->input('description');
+            $equipo->save();
 
-        return redirect()->route('equipos.index')
-            ->with('success', 'Equipo actualizado correctamente.');
+            return redirect()->route('equipos.index')
+                ->with('success', 'Equipo actualizado correctamente.');
+        } else {
+            return redirect()->route('equipos.index')
+                ->with('error', 'Equipo no encontrado.');
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Equipos $equipos)
+    public function destroy($id)
     {
-        $equipos->delete();
-        return redirect()->route('equipos.index')
-            ->with('success', 'Equipo eliminado correctamente.');
+        $equipo = Equipos::find($id);
+        if ($equipo) {
+            $equipo->delete();
+            return redirect()->route('equipos.index')
+                ->with('success', 'Equipo eliminado correctamente.');
+        } else {
+            return redirect()->route('equipos.index')
+                ->with('error', 'Equipo no encontrado.');
+        }
     }
 }
